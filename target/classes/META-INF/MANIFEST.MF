@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Class-Path: lib/jsoup-1.6.3.jar lib/commons-configuration-1.6.jar lib/
+ commons-collections-3.2.1.jar lib/commons-lang-2.4.jar lib/commons-lo
+ gging-1.1.1.jar lib/commons-digester-1.8.jar lib/commons-beanutils-1.
+ 7.0.jar lib/commons-beanutils-core-1.8.0.jar lib/slf4j-api-1.6.6.jar 
+ lib/slf4j-log4j12-1.6.6.jar lib/log4j-1.2.15.jar lib/mail-1.4.jar lib
+ /activation-1.1.jar lib/quartz-2.2.1.jar lib/c3p0-0.9.1.1.jar lib/mys
+ ql-connector-java-5.1.33.jar
+Build-Jdk: 1.7.0_79
+Built-By: mingyang
+Created-By: Maven Integration for Eclipse
+Main-Class: org.jobstream.JobStream
+
