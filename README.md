@@ -4,13 +4,13 @@ ETL workflow schedule system
 
 
 Requires：
-------
+--------
 Java version>=1.6x
 Maven 3.x
 mysql 5.x
 
 Introduce:
-------
+--------
 1、support various job scheduled,includes shell、python、java、mapreduce
 2、build dependencies stream automatically according to the input and output 
 3、Smart breakpoints to run again
@@ -20,7 +20,7 @@ Introduce:
 7、Job Error alert at once
 
 Installation
-------
+--------
 
 $git clone https://github.com/xmingyang/JobStream.git
 $cd JobStream
@@ -46,7 +46,7 @@ cd $JOBSTREAM_HOME/bin
 sh stop.sh
 
 Example:
-------
+--------
 insert into project (project_en,project_cn,max,param) values('proj_test','proj_test',2,'${hour}=expr_date(hour-2,HH);${a}=aaaaaaa');
 insert into proj_jobdetail(project_id,job_en,job_cn,priority,ip,port,user,path,hdfs_input,hdfs_output,job_type_id,param) 
     values(1,'test30_1','test30_1',0,'192.168.1.1',22,'root','/root/test30_1.sh','','/user/test30_1',1,'${a};${hour}');
@@ -64,7 +64,7 @@ In this project,we add three jobs test30_1（/root/test30_1.sh）、test30_2（/
 build dependencies stream automatically ,run jobs(test30_1,test30_2) successed ,then run test30_3
 
 Next Step:
-------
+--------
 develop ui to manage all 
 
 E-Mail:louiscool@126.com
