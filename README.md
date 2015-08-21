@@ -5,14 +5,14 @@ ETL workflow schedule system
 
 Requires：
 --------
-Java version>=1.6x
-Maven 3.x
-mysql 5.x
+Java version>=1.6x   
+Maven 3.x   
+mysql 5.x   
 
 Introduce:
 --------
-1、support various job scheduled,includes shell、python、java、mapreduce
-2、build dependencies stream automatically according to the input and output 
+1、support various job scheduled,includes shell、python、java、mapreduce   
+2、build dependencies stream automatically according to the input and output     
 3、Smart breakpoints to run again
 4、Job Priority control
 5、The number of concurrent control
