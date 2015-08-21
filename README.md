@@ -1,39 +1,70 @@
-jobstream
+JobStream
+===================================
+ETL workflow schedule system
 
 
 Requires£º
+¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª-
+Java version>=1.6x
+Maven 3.x
+mysql 5.x
 
-X86 CPU
-Linux Kernel Version >= 2.6.18
-Host OR VM (KVM,XEN,Vmware, etc)
+Introduce:
+¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª-
+1¡¢support various job scheduled,includes shell¡¢python¡¢java¡¢mapreduce
+2¡¢build dependencies stream automatically according to the input and output 
+3¡¢Smart breakpoints to run again
+4¡¢Job Priority control
+5¡¢The number of concurrent control
+6¡¢Error retry mechanism
+7¡¢Job Error alert at once
+
 Installation
+¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª-
 
-$git clone https://github.com/zzgang/kconnp.git
-$cd kconnp
-$./configure
-$make
-$make install
-Usage
+$git clone https://github.com/xmingyang/JobStream.git
+$cd JobStream
+$mvn package -Pdist,native -DskipTests ¨CDtar
+$cd target
+$tar -zxvf jobStream-0.0.1-SNAPSHOT.tar.gz
+$cp ../quartz.properties jobStream-0.0.1-SNAPSHOT/
+$cd jobStream-0.0.1-SNAPSHOT
+$cp jobStream-0.0.1-SNAPSHOT/lib/jobStream-0.0.1-SNAPSHOT.jar ../
+You can move jobStream-0.0.1-SNAPSHOT dir to your setup path,and set $JOBSTREAM_HOME environment variable 
 
-Commands
+next step: 
+prepare a mysql db,create jobstreamdb database and initialize jobstream table by ddl/mysql_table.sql
+modify conf/config.properties jdbc.url jdbc.username jdbc.password
+modify quartz.properties org.quartz.dataSource.myDS.URL org.quartz.dataSource.myDS.user org.quartz.dataSource.myDS.password
+ 
+start jobstream service:
+cd $JOBSTREAM_HOME/bin
+sh start.sh
 
-kconnp (stats|ldcfg|start|stop|restart)
+stop jobstream service
+cd $JOBSTREAM_HOME/bin
+sh stop.sh
 
-stats: output the statistics infomation
-ldcfg: reload the config
-start: start the service
-stop: shutdown the service
-restart: restart the service
-Configuration
+Example:
+¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª-
+insert into project (project_en,project_cn,max,param) values('proj_test','proj_test',2,'${hour}=expr_date(hour-2,HH);${a}=aaaaaaa');
+insert into proj_jobdetail(project_id,job_en,job_cn,priority,ip,port,user,path,hdfs_input,hdfs_output,job_type_id,param) 
+    values(1,'test30_1','test30_1',0,'192.168.1.1',22,'root','/root/test30_1.sh','','/user/test30_1',1,'${a};${hour}');
+insert into proj_jobdetail(project_id,job_en,job_cn,priority,ip,port,user,path,hdfs_input,hdfs_output,job_type_id) 
+    values(1,'test30_2','test30_2',0,'192.168.1.1',22,'root','/root/test30_2.sh','','/user/test30_2',1);
+insert into proj_jobdetail(project_id,job_en,job_cn,priority,ip,port,user,path,hdfs_input,hdfs_output,job_type_id) 
+    values(1,'test30_3','test30_3',0,'192.168.1.1',22,'root','/root/test30_3.sh','/user/test30_1;/user/test30_2','/user/test30_3',1);   
+insert into proj_crontab(project_id,cronexpression,is_enable) values(1,'0 30 3 * * ?',1);    
 
-Files
+so do it,we add a project named "proj_test" the project run max 2 jobs and the project contain two parameter:
+${hour}=expr_date(hour-2,HH) mean if current hour is 10,${hour} return 8
+${a}=aaaaaaa mean parameter ${a} is constant value is aaaaaaa
 
-Global: /etc/kconnp.conf
-White list for ACL: /etc/iports.allow
-Black list for ACL: /etc/iports.deny
-Explains
+In this project,we add three jobs test30_1£¨/root/test30_1.sh£©¡¢test30_2£¨/root/test30_2.sh£©¡¢test30_3£¨/root/test30_3.sh),according to the hdfs_input and hdfs_output,
+build dependencies stream automatically ,run jobs(test30_1,test30_2) successed ,then run test30_3
 
-The priority of black list is higer than white black list.
-If the iport is specified£¬the connections will be precommectted.
-If the connection is configured stateful (tag: (S))£¬each connection only be use one time before closing.
-E-Mail:£ºzzgang2008@foxmail.com
+Next Step:
+¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª-
+develop ui to manage all 
+
+E-Mail:louiscool@126.com
