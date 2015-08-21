@@ -1,7 +1,8 @@
 jobstream
+===================================
 
 
-Requires£º
+RequiresÂ£Âº
 
 X86 CPU
 Linux Kernel Version >= 2.6.18
@@ -34,6 +35,6 @@ Black list for ACL: /etc/iports.deny
 Explains
 
 The priority of black list is higer than white black list.
-If the iport is specified£¬the connections will be precommectted.
-If the connection is configured stateful (tag: (S))£¬each connection only be use one time before closing.
-E-Mail:£ºzzgang2008@foxmail.com
+If the iport is specifiedÂ£Â¬the connections will be precommectted.
+If the connection is configured stateful (tag: (S))Â£Â¬each connection only be use one time before closing.
+E-Mail:Â£Âºzzgang2008@foxmail.com
