@@ -3,28 +3,28 @@ JobStream
 ETL workflow schedule system
 
 
-Requires£º
-¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª-
+Requiresï¼š
+------
 Java version>=1.6x
 Maven 3.x
 mysql 5.x
 
 Introduce:
-¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª-
-1¡¢support various job scheduled,includes shell¡¢python¡¢java¡¢mapreduce
-2¡¢build dependencies stream automatically according to the input and output 
-3¡¢Smart breakpoints to run again
-4¡¢Job Priority control
-5¡¢The number of concurrent control
-6¡¢Error retry mechanism
-7¡¢Job Error alert at once
+------
+1ã€support various job scheduled,includes shellã€pythonã€javaã€mapreduce
+2ã€build dependencies stream automatically according to the input and output 
+3ã€Smart breakpoints to run again
+4ã€Job Priority control
+5ã€The number of concurrent control
+6ã€Error retry mechanism
+7ã€Job Error alert at once
 
 Installation
-¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª-
+------
 
 $git clone https://github.com/xmingyang/JobStream.git
 $cd JobStream
-$mvn package -Pdist,native -DskipTests ¨CDtar
+$mvn package -Pdist,native -DskipTests â€“Dtar
 $cd target
 $tar -zxvf jobStream-0.0.1-SNAPSHOT.tar.gz
 $cp ../quartz.properties jobStream-0.0.1-SNAPSHOT/
@@ -46,7 +46,7 @@ cd $JOBSTREAM_HOME/bin
 sh stop.sh
 
 Example:
-¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª-
+------
 insert into project (project_en,project_cn,max,param) values('proj_test','proj_test',2,'${hour}=expr_date(hour-2,HH);${a}=aaaaaaa');
 insert into proj_jobdetail(project_id,job_en,job_cn,priority,ip,port,user,path,hdfs_input,hdfs_output,job_type_id,param) 
     values(1,'test30_1','test30_1',0,'192.168.1.1',22,'root','/root/test30_1.sh','','/user/test30_1',1,'${a};${hour}');
@@ -60,11 +60,11 @@ so do it,we add a project named "proj_test" the project run max 2 jobs and the p
 ${hour}=expr_date(hour-2,HH) mean if current hour is 10,${hour} return 8
 ${a}=aaaaaaa mean parameter ${a} is constant value is aaaaaaa
 
-In this project,we add three jobs test30_1£¨/root/test30_1.sh£©¡¢test30_2£¨/root/test30_2.sh£©¡¢test30_3£¨/root/test30_3.sh),according to the hdfs_input and hdfs_output,
+In this project,we add three jobs test30_1ï¼ˆ/root/test30_1.shï¼‰ã€test30_2ï¼ˆ/root/test30_2.shï¼‰ã€test30_3ï¼ˆ/root/test30_3.sh),according to the hdfs_input and hdfs_output,
 build dependencies stream automatically ,run jobs(test30_1,test30_2) successed ,then run test30_3
 
 Next Step:
-¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª-
+------
 develop ui to manage all 
 
 E-Mail:louiscool@126.com
