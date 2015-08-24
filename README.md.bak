@@ -31,21 +31,19 @@ $cp ../quartz.properties jobStream-0.0.1-SNAPSHOT/
 $cd jobStream-0.0.1-SNAPSHOT   
 $cp jobStream-0.0.1-SNAPSHOT/lib/jobStream-0.0.1-SNAPSHOT.jar ../
 ```   
-You can move jobStream-0.0.1-SNAPSHOT dir to your setup path,and set $JOBSTREAM_HOME environment variable     
-
-next step:     
-prepare a mysql db,create jobstreamdb database and initialize jobstream table by ddl/mysql_table.sql    
+You can move jobStream-0.0.1-SNAPSHOT dir to your setup path,and set $JOBSTREAM_HOME environment variable         
+Prepare a mysql db,create jobstreamdb database and initialize jobstream table by ddl/mysql_table.sql    
 modify conf/config.properties jdbc.url jdbc.username jdbc.password     
 modify quartz.properties org.quartz.dataSource.myDS.URL org.quartz.dataSource.myDS.user org.quartz.dataSource.myDS.password    
  
-start jobstream service:
+**Start jobstream service:**
 ```    
 cd $JOBSTREAM_HOME/bin    
 sh start.sh   
 ```
 
 
-stop jobstream service:
+**Stop jobstream service:**
 ```   
 cd $JOBSTREAM_HOME/bin   
 sh stop.sh
@@ -64,7 +62,7 @@ insert into proj_jobdetail(project_id,job_en,job_cn,priority,ip,port,user,path,h
 insert into proj_crontab(project_id,cronexpression,is_enable) values(1,'0 30 3 * * ?',1);
 ```          
 
-S do it,we add a project named "proj_test" the project run max 2 jobs and the project contain two parameter:    
+So do it,we add a project named "proj_test" ,the project run max 2 jobs and the project contain two parameter:    
 ${hour}=expr_date(hour-2,HH) mean if current hour is 10,${hour} return 8    
 ${a}=aaaaaaa mean parameter ${a} is constant value is aaaaaaa    
 

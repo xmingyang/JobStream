@@ -36,14 +36,14 @@ Prepare a mysql db,create jobstreamdb database and initialize jobstream table by
 modify conf/config.properties jdbc.url jdbc.username jdbc.password     
 modify quartz.properties org.quartz.dataSource.myDS.URL org.quartz.dataSource.myDS.user org.quartz.dataSource.myDS.password    
  
-**Start jobstream service:**
+**start jobstream service:**
 ```    
 cd $JOBSTREAM_HOME/bin    
 sh start.sh   
 ```
 
 
-**Stop jobstream service:**
+**stop jobstream service:**
 ```   
 cd $JOBSTREAM_HOME/bin   
 sh stop.sh
