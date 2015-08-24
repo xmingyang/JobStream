@@ -11,5 +11,4 @@ pythonmodule=bin/pythonmodule.sh
 javamodule=bin/javamodule.sh
 mapreducemodule=bin/mapreducemodule.sh
 #email address list
-
 email=xxx@xxx.com\,yyy@yyy.com
