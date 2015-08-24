@@ -73,6 +73,6 @@ build dependencies stream automatically ,run jobs(test30_1,test30_2) successed ,
 
 Next Step
 --------
-develop ui to manage all    
+Develop UI to manage all    
 
-E-Mail:louiscool@126.com
+**E-Mail:**louiscool@126.com
