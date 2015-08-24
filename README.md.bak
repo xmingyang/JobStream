@@ -64,7 +64,7 @@ insert into proj_jobdetail(project_id,job_en,job_cn,priority,ip,port,user,path,h
 insert into proj_crontab(project_id,cronexpression,is_enable) values(1,'0 30 3 * * ?',1);
 ```          
 
-so do it,we add a project named "proj_test" the project run max 2 jobs and the project contain two parameter:    
+S do it,we add a project named "proj_test" the project run max 2 jobs and the project contain two parameter:    
 ${hour}=expr_date(hour-2,HH) mean if current hour is 10,${hour} return 8    
 ${a}=aaaaaaa mean parameter ${a} is constant value is aaaaaaa    
 
