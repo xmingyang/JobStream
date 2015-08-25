@@ -18,15 +18,10 @@
             <directory>logs</directory>
             <outputDirectory>logs</outputDirectory>
         </fileSet>
-         <fileSet>
+        <fileSet>
             <directory>bin</directory>
             <outputDirectory>bin</outputDirectory>
         </fileSet>
-        <fileSet>
-            <directory>ddl</directory>
-            <outputDirectory>ddl</outputDirectory>
-        </fileSet>
-
     </fileSets>
     <dependencySets>
         <dependencySet>
