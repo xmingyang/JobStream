@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -517,6 +518,9 @@ private int log_id=0;
 	 logger.info("job_en:"+job_en+" checkAndJoinQue running");
 	 //被哪些作业依赖，再分别检查这些作业是否可以加入队列
 	 HashSet<String> hs=jobinfo.getRefedjobs();
+	 Map<String,String> currentstautsmap=null;
+	 if (hs.size()>0)
+		 currentstautsmap= new ConcurrentHashMap<String,String>(stautsmap);
 	 for(Iterator it=hs.iterator();it.hasNext();)
 	  {
 		 String job_en_item=(String) it.next();
@@ -527,9 +531,9 @@ private int log_id=0;
 		 for(Iterator it1=refitem.iterator();it1.hasNext();)
 		  {
 			 String job_en_item1=(String) it1.next();
-			 if (stautsmap.containsKey(job_en_item1))
+			 if (currentstautsmap.containsKey(job_en_item1))
 			 {
-			 if (stautsmap.get(job_en_item1).equals("C"))
+			 if (currentstautsmap.get(job_en_item1).equals("C"))
 			 {
 				 success_size++;
 		      }
