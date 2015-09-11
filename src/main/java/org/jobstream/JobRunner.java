@@ -43,8 +43,10 @@ public class JobRunner extends Thread
 	Map<String,JobInfo> jobinfomap;//job基本信息
 	Map<String,String> project_param;
 	Map<String,String> runningmap;
+	Map<String,String> pre_runningmap;
 
-	public JobRunner(JobInfo jobinfo,ArrayList<JobInfo> jobqueue,Map<String,String> stautsmap,String project_en,int crontab_id,String scheduler_seq,Map<String,JobInfo> jobinfomap,Map<String,String> project_param,	Map<String,String> runningmap)
+	public JobRunner(JobInfo jobinfo,ArrayList<JobInfo> jobqueue,Map<String,String> stautsmap,String project_en,int crontab_id,String scheduler_seq,Map<String,JobInfo> jobinfomap,Map<String,String> project_param,	Map<String,String> runningmap,
+			Map<String,String> pre_runningmap)
 	{
 		this.jobinfo=jobinfo;
 		this.jobqueue=jobqueue;
@@ -55,6 +57,7 @@ public class JobRunner extends Thread
 		this.jobinfomap=jobinfomap;
 		this.project_param=project_param;
 		this.runningmap=runningmap;
+		this.pre_runningmap=pre_runningmap;
 	}
 	/*
 	public static synchronized void opScnt(String type)
@@ -538,16 +541,20 @@ private int log_id=0;
 				 success_size++;
 		      }
 			 }
+		  } 
 			 
 			 //if (totalsize==success_size && !stautsmap.contains(jobinfo.getJob_en()))
-			 if (totalsize==success_size)
+			 if (totalsize==success_size && !pre_runningmap.containsKey(job_en_item) && !currentstautsmap.containsKey(job_en_item))
 			 {
 				 jobinfo.setStarttime(new Date().getTime());
 				 
 				 synchronized(jobqueue)
 				 {
 					 logger.info("job_en:"+job_en+  " refed job_en:"+jobinfo.getJob_en()+" adding jobqueue");
+					
 			    jobqueue.add(jobinfo);
+			    pre_runningmap.put(job_en_item, "");
+			   
 			    logger.info("job_en:"+job_en+  " refed job_en:"+jobinfo.getJob_en()+" added jobqueue");
 				 resortJobqueue();
 				  logger.info("job_en:"+job_en+  " refed job_en:"+jobinfo.getJob_en()+" resort jobqueue");
@@ -557,7 +564,7 @@ private int log_id=0;
 			 }
 		
 		  
-	  }
+	  
 
 	  }
 	 logger.info("job_en:"+job_en+" checkAndJoinQue end");

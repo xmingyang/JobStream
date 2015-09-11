@@ -32,7 +32,8 @@ public class SchedJobExec implements Job {
 		Map<String,ArrayList<String>> inputjobs=new HashMap<String,ArrayList<String>>(); //每个input都有哪些job依赖
 		Map<String,String> project_param=new HashMap<String,String>();
 		Map<String,String> runningmap =new ConcurrentHashMap<String,String>();
-		JobStream jobmain=new JobStream(jobqueue,outputjob,stautsmap,jobinfomap,inputjobs,project_param,runningmap);
+		Map<String,String> pre_runningmap =new HashMap<String,String>();
+		JobStream jobmain=new JobStream(jobqueue,outputjob,stautsmap,jobinfomap,inputjobs,project_param,runningmap,pre_runningmap);
 		jobmain.setProject_en(project_en);
 		jobmain.setScheduler_seq(new java.text.SimpleDateFormat("yyyyMMddHHmmss").format(new java.util.Date()));
 		jobmain.setCrontab_id(crontab_id);

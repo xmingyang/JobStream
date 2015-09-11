@@ -154,8 +154,9 @@ public class JobStream {
 	Map<String,ArrayList<String>> inputjobs; //每个input都有哪些job依赖
 	Map<String,String> project_param;
 	Map<String,String> runningmap;
+	Map<String,String> pre_runningmap;
 	
-	public JobStream(ArrayList<JobInfo> jobqueue,Map<String,ArrayList<String>> outputjob,Map<String,String> stautsmap,Map<String,JobInfo> jobinfomap,Map<String,ArrayList<String>> inputjobs,Map<String,String> project_param,Map<String,String> runningmap )
+	public JobStream(ArrayList<JobInfo> jobqueue,Map<String,ArrayList<String>> outputjob,Map<String,String> stautsmap,Map<String,JobInfo> jobinfomap,Map<String,ArrayList<String>> inputjobs,Map<String,String> project_param,Map<String,String> runningmap,Map<String,String> pre_runningmap )
 	{
 		this.jobqueue=jobqueue;
 		this.outputjob=outputjob;
@@ -164,6 +165,7 @@ public class JobStream {
 		this.inputjobs=inputjobs;
 		this.project_param=project_param;
 		this.runningmap=runningmap;
+		this.pre_runningmap=pre_runningmap;
 	}
 
 
@@ -403,7 +405,8 @@ public class JobStream {
 	    		{
 	    		long starttime=new Date().getTime();
 	    		jinfo.setStarttime(starttime);
-	    		jobqueue.add(jinfo);   		
+	    		jobqueue.add(jinfo);   
+	    		pre_runningmap.put(jinfo.getJob_en(), "");
 	    		}
 	    	logger.info("init jobqueue size:"+jobqueue.size());
 	    	}
@@ -498,7 +501,8 @@ public class JobStream {
 		    		{
 		    		long starttime=new Date().getTime();
 		    		jinfo.setStarttime(starttime);
-		    		jobqueue.add(jinfo);   		
+		    		jobqueue.add(jinfo);   	
+		    		pre_runningmap.put(jinfo.getJob_en(), "");
 		    		}
 		    	logger.info("init jobqueue size:"+jobqueue.size());
 	    			
@@ -591,8 +595,9 @@ public class JobStream {
 				
 				{	
 				//logger.info("c<getMax:c:"+c+" x:0");
+				pre_runningmap.remove(jobinfo.getJob_en());
 				x=0;
-				JobRunner jr=new JobRunner(jobinfo,jobqueue,stautsmap, project_en, crontab_id, scheduler_seq,jobinfomap,project_param,runningmap);
+				JobRunner jr=new JobRunner(jobinfo,jobqueue,stautsmap, project_en, crontab_id, scheduler_seq,jobinfomap,project_param,runningmap,pre_runningmap);
 				jr.start();
 				try {
 					Thread.sleep(600);
@@ -674,7 +679,8 @@ public class JobStream {
 		Map<String,ArrayList<String>> inputjobs=new HashMap<String,ArrayList<String>>(); //每个input都有哪些job依赖
 		Map<String,String> project_param=new HashMap<String,String>();
 		Map<String,String> runningmap =new ConcurrentHashMap<String,String>();
-		JobStream jobmain=new JobStream(jobqueue,outputjob,stautsmap,jobinfomap,inputjobs,project_param,runningmap);
+		Map<String,String> pre_runningmap =new HashMap<String,String>();
+		JobStream jobmain=new JobStream(jobqueue,outputjob,stautsmap,jobinfomap,inputjobs,project_param,runningmap,pre_runningmap);
 		jobmain.setProject_en(param_value.get("project_en"));
 		jobmain.setScheduler_seq(new java.text.SimpleDateFormat("yyyyMMddHHmmss").format(new java.util.Date()));
 		if(param_value.containsKey("is_last_rerun"))
