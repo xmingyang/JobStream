@@ -5,6 +5,9 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -103,25 +106,82 @@ public class CommonUtil {
 			else
 			{
 				
-				
+				return sdf.format(thiscal.getTime());
+				/*
 				if (dateval.trim().equals("date"))
 				{
-					thiscal.add(Calendar.DAY_OF_MONTH,Integer.parseInt("+"+dateval.trim()));
+					//thiscal.add(Calendar.DAY_OF_MONTH,Integer.parseInt("+"+dateval.trim()));
 					
 					return sdf.format(thiscal.getTime());
 				}
 				else if (dateval.trim().equals("hour"))
 				{
-					thiscal.add(Calendar.HOUR_OF_DAY,Integer.parseInt("+"+dateval.trim()));
+					//thiscal.add(Calendar.HOUR_OF_DAY,Integer.parseInt("+"+dateval.trim()));
 					return sdf.format(thiscal.getTime());
 					
 				}
+				*/
 			}
 			
 		}
 		return expr_date;
 	}
+	//验证是否有效的小时
+	public static boolean is_hour(String hour)
+	{
+		if (hour!=null && !hour.equals(""))
+		{
+			if (is2Numberic(hour))
+			{
+			  if (Integer.parseInt(hour)>=0 && Integer.parseInt(hour)<=23)
+				return true;
+			}
+		}
+		return false;
+	}
+	//验证是否有效的分钟
+	public static boolean is_min(String min)
+	{
+		if (min!=null && !min.equals(""))
+		{
+			if (is2Numberic(min))
+			{
+			  if (Integer.parseInt(min)>=0 && Integer.parseInt(min)<=59)
+				return true;
+			}
+		}
+		return false;
+	}
 	
+	
+	public static boolean is2Numberic(String str){   
+	     Pattern pattern = Pattern.compile("[0-9]{1,2}");   
+	       Matcher isNum = pattern.matcher(str);  
+	       if( !isNum.matches() ){  
+	           return false;   
+	       }   
+	       return true;   
+	    }
+	
+	 public static String getLocalIp()
+		{
+			InetAddress myIPaddress=null;
+			try { 
+				myIPaddress=InetAddress.getLocalHost();
+				}
+			catch (UnknownHostException e) {}
+		 return myIPaddress.getHostAddress();
+		 
+		}
+     public static String getUserName()
+		{
+			return System.getProperty("user.name");
+		}
+     
+     public static String getDir()
+		{
+			return System.getProperty("user.dir");
+		}
 	public static void main(String[] args)
 	{
 	  if (args.length==2)

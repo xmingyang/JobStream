@@ -12,11 +12,8 @@ public class DbCoonect {
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
+
 		try {
-		//	c = DriverManager
-	//				.getConnection(
-	//						"jdbc:mysql://10.77.140.148:10036/wanda",
-	//						"wanda", "wanda123");
 			
 			c = DriverManager
 					.getConnection(
@@ -25,7 +22,29 @@ public class DbCoonect {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+
 		return c;
 	}
+	
+	public static Connection getConnectionMySql_retry() throws Exception {
+		Connection c = null;
+		//数据连接失败30s后重试，最多重试60次
+		for (int retrynum=1;retrynum<=60;retrynum++)
+		{
+			try {
+			c=getConnectionMySql();
+			}
+			catch (SQLException e) {
+				e.printStackTrace();
+			}
+			if (c!=null)
+				return c;
+			else
+				Thread.sleep(30000);
+		}
+		return c;
+	}
+	
+
 
 }

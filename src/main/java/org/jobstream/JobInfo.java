@@ -20,6 +20,35 @@ public class JobInfo {
 	private long starttime;
 	private String job_en;
 	private String job_cn;
+	private String owner;
+	private String hour;
+	private String min;
+	public String getHour() {
+		return hour;
+	}
+
+	public void setHour(String hour) {
+		this.hour = hour;
+	}
+
+	public String getMin() {
+		return min;
+	}
+
+	public void setMin(String min) {
+		this.min = min;
+	}
+
+	
+	
+
+	public String getOwner() {
+		return owner;
+	}
+
+	public void setOwner(String owner) {
+		this.owner = owner;
+	}
 
 	public String getJob_en() {
 		return job_en;

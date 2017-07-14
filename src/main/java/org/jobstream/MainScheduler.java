@@ -67,7 +67,7 @@ public class MainScheduler {
 		
 			sql = con.createStatement();
 
-			String strSql = "select a.id,b.project_en,a.cronexpression,a.is_enable from proj_crontab a,project b where"
+			String strSql = "select a.id,b.project_en,a.cronexpression,a.param from proj_crontab a,project b where"
 					+ " a.project_id=b.id and a.is_enable=1 ";
 			// System.out.println("3333333333:" + strSql);
 			rs = sql.executeQuery(strSql);
@@ -76,6 +76,7 @@ public class MainScheduler {
 				int  crontab_id=rs.getInt(1);
 				String project_en=rs.getString(2);
 				String cronexpression=rs.getString(3);
+				String param=rs.getString(4);
 				//int max=rs.getInt(5);
 				/*
 				if (sched.getJobDetail(new JobKey(project_en+String.valueOf(crontab_id)),project_en+String.valueOf(crontab_id))==null))
@@ -101,7 +102,8 @@ public class MainScheduler {
 							.build();
 						//	System.out.println(trigger.getCronExpression());
 							 job.getJobDataMap().put("project_en", project_en);  
-							 job.getJobDataMap().put("crontab_id", crontab_id); 
+							 job.getJobDataMap().put("crontab_id", crontab_id);
+							 job.getJobDataMap().put("param", param); 
 						//	 job.getJobDataMap().put("max", max);
 				
 							sched.scheduleJob(job, trigger);
@@ -122,6 +124,7 @@ public class MainScheduler {
 
 		} finally {
 			try {
+				sql.close();
 				con.close();
 			} catch (SQLException e) {
 			//	e.printStackTrace();
@@ -196,7 +199,7 @@ public class MainScheduler {
 		
 		try {
 		//	Thread.sleep(200000);
-			Thread.sleep(120000);
+			Thread.sleep(60000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 		//	e.printStackTrace();

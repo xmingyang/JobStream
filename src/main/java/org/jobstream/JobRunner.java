@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import java.util.Date;
 
 
 public class JobRunner extends Thread
@@ -44,9 +45,10 @@ public class JobRunner extends Thread
 	Map<String,String> project_param;
 	Map<String,String> runningmap;
 	Map<String,String> pre_runningmap;
+	Map<String,String> runningmap_aftertime;
 
 	public JobRunner(JobInfo jobinfo,ArrayList<JobInfo> jobqueue,Map<String,String> stautsmap,String project_en,int crontab_id,String scheduler_seq,Map<String,JobInfo> jobinfomap,Map<String,String> project_param,	Map<String,String> runningmap,
-			Map<String,String> pre_runningmap)
+			Map<String,String> pre_runningmap,Map<String,String> runningmap_aftertime)
 	{
 		this.jobinfo=jobinfo;
 		this.jobqueue=jobqueue;
@@ -58,6 +60,7 @@ public class JobRunner extends Thread
 		this.project_param=project_param;
 		this.runningmap=runningmap;
 		this.pre_runningmap=pre_runningmap;
+		this.runningmap_aftertime=runningmap_aftertime;
 	}
 	/*
 	public static synchronized void opScnt(String type)
@@ -89,11 +92,66 @@ public class JobRunner extends Thread
  public  void run()
 
  {  
+	 Logger logger = Logger.getLogger(JobRunner.class.getName());
+	
 	// opScnt("inc");
 	 if (!runningmap.containsKey(jobinfo.getJob_en()))
 	 {
 	 runningmap.put(jobinfo.getJob_en(), "");
-	 }
+	 }	
+	//时间依赖控制部分	 
+	String after_hour=jobinfo.getHour();
+	String after_min=jobinfo.getMin();
+		if (CommonUtil.is_hour(after_hour) || CommonUtil.is_min(after_min)) {
+			logger.info("job:"+jobinfo.getJob_en()+"  start time ref"+" after_hour:"+after_hour+" after_min:"+after_min);
+			int cnt = 0;
+			while (true) {
+				if (!runningmap_aftertime.containsKey(jobinfo.getJob_en()))
+				 {
+					runningmap_aftertime.put(jobinfo.getJob_en(), "");
+				 }	
+				
+				Date currentdate = new Date();
+				int hour = currentdate.getHours();
+				int min = currentdate.getMinutes();
+				// 同时设置了小时和分钟
+				if (CommonUtil.is_hour(after_hour) && CommonUtil.is_min(after_min)) {
+					if (hour > Integer.parseInt(after_hour)
+							|| (hour == Integer.parseInt(after_hour) && min >= Integer.parseInt(after_min))) {
+						break;
+					}
+
+				}
+				// 只设置分钟，大于该分钟即执行
+				else if (!CommonUtil.is_hour(after_hour) && CommonUtil.is_min(after_min)) {
+					if (min >= Integer.parseInt(after_min))
+						break;
+
+				} else if (CommonUtil.is_hour(after_hour) && !CommonUtil.is_min(after_min)) {
+					if (hour >= Integer.parseInt(after_hour))
+						break;
+				}
+				try {
+					Thread.sleep(20000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				cnt++;
+				// 超过6小时直接退出
+				if (cnt > 1080)
+					break;
+
+			}
+			if (runningmap_aftertime.containsKey(jobinfo.getJob_en()))
+			 {
+				runningmap_aftertime.remove(jobinfo.getJob_en());
+			 }	
+			logger.info("job:"+jobinfo.getJob_en()+"  end time ref"+" after_hour:"+after_hour+" after_min:"+after_min);
+		}
+
+		 
+	
    execScript();
   // opScnt("reduce");
    if (runningmap.containsKey(jobinfo.getJob_en()))
@@ -144,7 +202,7 @@ private int log_id=0;
 		ResultSet rs=null;
 
 		try {
-			con = DbCoonect.getConnectionMySql();
+			con = DbCoonect.getConnectionMySql_retry();
 			if (con == null) {
 				logger.error("connect is null");
 				System.exit(0);
@@ -153,10 +211,11 @@ private int log_id=0;
 
             String start_date=new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date( ));
             String datekey=new java.text.SimpleDateFormat("yyyyMMdd").format(new java.util.Date( ));
-			String strSql = " insert into proj_log(project_en,proj_crontab_id,proj_scheduler_seq,job_en,job_cn,start_date,datekey,program_status,path) values('"+project_en+"',"+
-					crontab_id+",'"+scheduler_seq+"','"+jobinfo.getJob_en()+"','"+jobinfo.getJob_cn()+"','"+start_date+"','"+datekey+"','"+"S"+"','"+jobinfo.getPath()+"')";
+			String strSql = " insert into proj_log(project_en,proj_crontab_id,proj_scheduler_seq,job_en,job_cn,start_date,datekey,program_status,path,owner) values('"+project_en+"',"+
+					crontab_id+",'"+scheduler_seq+"','"+jobinfo.getJob_en()+"','"+jobinfo.getJob_cn()+"','"+start_date+"','"+datekey+"','"+"S"+"','"+jobinfo.getPath()+"','"+jobinfo.getOwner()+"')";
 			// System.out.println("3333333333:" + strSql);
-		 sql.executeUpdate(strSql);
+			sql.executeQuery("set names utf8");
+			sql.executeUpdate(strSql);
 		rs= sql.executeQuery("select last_insert_id()");
 		if (rs.next())
 		{
@@ -189,7 +248,7 @@ private int log_id=0;
 		logger.info("job_en:"+jobinfo.getJob_en()+" status:"+status+" finish_log db connecting ");
 
 		try {
-			con = DbCoonect.getConnectionMySql();
+			con = DbCoonect.getConnectionMySql_retry();
 			if (con == null) {
 				logger.error("connect is null");
 				System.exit(0);
@@ -219,37 +278,35 @@ private int log_id=0;
 		}
  }
  
- public String getLocalIp()
-	{
-		InetAddress myIPaddress=null;
-		try { 
-			myIPaddress=InetAddress.getLocalHost();
-			}
-		catch (UnknownHostException e) {}
-	 return myIPaddress.getHostAddress();
-	 
-	}
-	public String getUserName()
-	{
-		return System.getProperty("user.name");
-	}
  public void execScript()
  {
 	 PropertyConfigurator.configure("conf/log4j.properties");
 		Logger logger = Logger.getLogger(JobRunner.class.getName());
 		logger.info(jobinfo.getJob_en()+" begin exec");
 	 stautsmap.put(jobinfo.getJob_en(), "S");
-	// String command = "ssh -p"+jobinfo.getPort()+" "+jobinfo.getUser()+"@"+jobinfo.getIp()+ " \""+jobinfo.getPath()+"\"";
-	 //logger.info(command);
- //   String command=jobinfo.getPath();
 	 String[] cmds=null;
 	 String cmd="";
-	 if (getLocalIp().equals(jobinfo.getIp()))
+	 String[] cmdslocal=new String[3];
+	 logger.info(jobinfo.getJob_en()+"localip:");
+	 String ip=CommonUtil.getLocalIp();
+	 String username=CommonUtil.getUserName();
+	 String currPath=CommonUtil.getDir();
+	 if (jobinfo.getIp()==null || jobinfo.getIp().equals(""))
+	 {
+		 jobinfo.setIp(ip);
+		 logger.info(jobinfo.getJob_en()+" ip is null and update ip default:"+ip);
+	 }
+	 if (jobinfo.getUser()==null || jobinfo.getUser().equals(""))
+	 {
+		 jobinfo.setUser(username);
+		 logger.info(jobinfo.getJob_en()+"user is null and update user default:"+username);
+	 }
+	 if (ip.equals(jobinfo.getIp()) )
 	 {
 		 
 	// cmds = new String[2];
 	 String prestr="";
-	 if (!getUserName().equals(jobinfo.getUser()))
+	 if (!username.equals(jobinfo.getUser()))
 	 {
 		 prestr="sudo -u "+jobinfo.getUser()+" ";
 	 }
@@ -275,39 +332,47 @@ private int log_id=0;
 	 }
 	 
 	 cmd=cmd+" "+jobinfo.getPath();
+	 cmdslocal[0]="sh";
+	 cmdslocal[1]="-c";
+	 cmdslocal[2]=cmd;
 	 }
 	 else
 	 {
-	cmds = new String[5];
+	cmds = new String[3];
+	cmds[0]="sh";
+	cmds[1]="-c";
+	
 	 if (jobinfo.getJob_type().equals("shell"))
 	 {
-		cmds[0] = PropHelper.getStringValue("sshmodule");
+		cmds[2] = PropHelper.getStringValue("sshmodule");
 	 }
 	 else if (jobinfo.getJob_type().equals("python"))
 	 {
-		 cmds[0] = PropHelper.getStringValue("pythonmodule");
+		 cmds[2] = PropHelper.getStringValue("pythonmodule");
 	 }
 	 else if (jobinfo.getJob_type().equals("java"))
 	 {
-		 cmds[0] = PropHelper.getStringValue("javamodule");
+		 cmds[2] = PropHelper.getStringValue("javamodule");
 	 }
 	 else if (jobinfo.getJob_type().equals("mapreduce"))
 	 {
-		 cmds[0] = PropHelper.getStringValue("mapreducemodule");
+		 cmds[2] = PropHelper.getStringValue("mapreducemodule");
 	 }
 	 else
 	 {
-		 cmds[0] = PropHelper.getStringValue("sshmodule");
+		 cmds[2] = PropHelper.getStringValue("sshmodule");
 	 }
-	 
-	    cmds[1]=String.valueOf(jobinfo.getPort());
-	    cmds[2]=jobinfo.getUser();
-	    cmds[3]=jobinfo.getIp();
-	    cmds[4]=jobinfo.getPath();
+	 cmds[2]="sh "+cmds[2]+" "+String.valueOf(jobinfo.getPort())+" "+jobinfo.getUser()+" "+jobinfo.getIp()+" \""+jobinfo.getPath();
+	//    cmds[2]=String.valueOf(jobinfo.getPort());
+	 //   cmds[3]=jobinfo.getUser();
+	  //  cmds[4]=jobinfo.getIp();
+	  //  cmds[5]=jobinfo.getPath();
 	 
 	 }
 	    if (jobinfo.getParam()!=null)
 		{
+	    	//${cdate}=expr_date(date-1,yyyyMMdd) 
+	    	//${hour}=expr_date(hour-2,yyyyMMddHH)
 	    	if (!jobinfo.getParam().equals(""))
 	    	{	
 			String[] s=jobinfo.getParam().split(";");
@@ -335,17 +400,27 @@ private int log_id=0;
 					s[i]=s[i].replace(item1, CommonUtil.expr_date(item1));
 				
 				}
-				if(getLocalIp().equals(jobinfo.getIp()))
+				if(ip.equals(jobinfo.getIp()))
 					{
-					cmd=cmd+" "+s[i];
+				//	cmd=cmd+" "+s[i];
+					cmdslocal[2]=cmdslocal[2]+" "+s[i];
 					}
 				else
 				{
-					cmds[4]=cmds[4]+" "+s[i];
+					//cmds[4]=cmds[4]+" "+s[i];
+				//	cmds[5]=cmds[5]+" "+s[i];
+					cmds[2]=cmds[2]+" "+s[i];
 				}
 			}
 	    	}
 		}
+	    if(!ip.equals(jobinfo.getIp()))
+		{
+	//	cmd=cmd+" "+s[i];
+	    	cmds[2]=cmds[2]+"\"";
+		}
+	    
+	    //sh -c "bin/sshmodule.sh 22 root 10.163.240.232  "/root/test30_1.sh aaaaaaa 08"" >/tmp/test.log 2>&1
 	
 	//    logger.info(Arrays.toString(cmds));
 	    
@@ -354,15 +429,24 @@ private int log_id=0;
 	 String status="";
 	 init_log();
 	 Process ps=null;
-	 
+		Date d=new Date();
+		//   String datastr = new java.text.SimpleDateFormat("yyyyMMddHHmmss").format(d);
+		   String datastr = scheduler_seq;
 	    try {
-	    	if(getLocalIp().equals(jobinfo.getIp()))
+	    	if(ip.equals(jobinfo.getIp()))
 	    	{
-	    		logger.info("cmd:"+cmd);
-	    		ps = Runtime.getRuntime().exec(cmd);
+	    		//logger.info("cmdslocal:-");
+	    		cmdslocal[2]=cmdslocal[2]+" >logs/userlogs/"+jobinfo.getJob_en()+".log"+"."+datastr+" 2>&1" ;
+	    		logger.info("cmd:"+Arrays.toString(cmdslocal));
+	    	//	ps = Runtime.getRuntime().exec(cmd);
+	    		
+	    		ps = Runtime.getRuntime().exec(cmdslocal);
 	    	}
 	    	else
 	    	{
+	    	//	cmds[6]=" >logs/userlogs/"+jobinfo.getJob_en()+".log"+"."+datastr+" 2>&1";
+	    		cmds[2]=cmds[2]+" >logs/userlogs/"+jobinfo.getJob_en()+".log"+"."+datastr+" 2>&1";
+	    		
 	    		logger.info("cmds:"+Arrays.toString(cmds));
 	         ps = Runtime.getRuntime().exec(cmds);
 	    	}
@@ -485,8 +569,10 @@ private int log_id=0;
 	        	 finish_log(status,errbuilder.toString());
 	        	 logger.info(jobinfo.getJob_en()+" updated status F in db");
 	        	 logger.info(jobinfo.getJob_en()+": fail exec "+errbuilder.toString());
-	        	 CommonUtil.sendmail(new StringBuilder("job_en:").append(jobinfo.getJob_en()).append("\n").append("path:").append(jobinfo.getPath()).append("\n")
-	        			 .append("error message:").append(errbuilder.toString()).toString(), jobinfo.getPath());
+	        	// CommonUtil.sendmail(new StringBuilder("job_en:").append(jobinfo.getJob_en()).append("\n").append("path:").append(jobinfo.getPath()).append("\n")
+	        	//		 .append("error message:").append(errbuilder.toString()).toString(), jobinfo.getPath());
+	        	 CommonUtil.sendmail(new StringBuilder("Hi,"+jobinfo.getOwner()).append("\n").append("任务"+jobinfo.getJob_en()).append(" 脚本路径:").append(jobinfo.getPath()).append("跑批出错,请尽快修复!").append(" 详细日志请查看日志"+currPath+"/logs/userlogs/"+jobinfo.getJob_en()+".log"+"."+datastr).toString(),"报警["+jobinfo.getOwner()+"]"+"脚本"+jobinfo.getPath())
+	     	        		;
 	        	 
 	        	}
 	           
@@ -497,17 +583,20 @@ private int log_id=0;
 	    	status="F";
        	 stautsmap.put(jobinfo.getJob_en(), "F");
        	finish_log(status,ioe.getMessage()); 
-        CommonUtil.sendmail(new StringBuilder("job_en:").append(jobinfo.getJob_en()).append("\n").append("path:").append(jobinfo.getPath()).append("\n")
-   			 .append("error message:").append(ioe.getMessage()).toString(), jobinfo.getPath());
-       	
+      //  CommonUtil.sendmail(new StringBuilder("job_en:").append(jobinfo.getJob_en()).append("\n").append("path:").append(jobinfo.getPath()).append("\n")
+   		//	 .append("error message:").append(ioe.getMessage()).toString(), jobinfo.getPath());
+       	CommonUtil.sendmail(new StringBuilder("Hi,"+jobinfo.getOwner()).append("\n").append("任务"+jobinfo.getJob_en()).append(" 脚本路径:").append(jobinfo.getPath()).append("跑批出错,请尽快修复!").append(" 详细日志请查看JobStream安装目录logs/userlogs/"+jobinfo.getJob_en()+".log"+"."+datastr).toString(),"脚本"+jobinfo.getPath()+"报警["+jobinfo.getOwner()+"]")
+ 		;	
 	    } catch (InterruptedException e) {
 	        // TODO Auto-generated catch block
 	        logger.error(jobinfo.getJob_en()+": "+e.getMessage());
 	       	status="F";
 	       	 stautsmap.put(jobinfo.getJob_en(), "F");
 	       	finish_log(status,e.getMessage()); 
-	       	CommonUtil.sendmail(new StringBuilder("job_en:").append(jobinfo.getJob_en()).append("\n").append("path:").append(jobinfo.getPath()).append("\n")
-	      			 .append("error message:").append(e.getMessage()).toString(), jobinfo.getPath());
+	      // 	CommonUtil.sendmail(new StringBuilder("job_en:").append(jobinfo.getJob_en()).append("\n").append("path:").append(jobinfo.getPath()).append("\n")
+	     // 			 .append("error message:").append(e.getMessage()).toString(), jobinfo.getPath());
+	       	CommonUtil.sendmail(new StringBuilder("Hi,"+jobinfo.getOwner()).append("\n").append("任务"+jobinfo.getJob_en()).append(" 脚本路径:").append(jobinfo.getPath()).append("跑批出错,请尽快修复!").append(" 详细日志请查看JobStream安装目录logs/userlogs/"+jobinfo.getJob_en()+".log"+"."+datastr).toString(),"脚本"+jobinfo.getPath()+"报警["+jobinfo.getOwner()+"]")
+     		;
 	    }
 	   
 	 
@@ -543,26 +632,23 @@ private int log_id=0;
 			 }
 		  } 
 			 
+		 synchronized(jobqueue)
+		 {
 			 //if (totalsize==success_size && !stautsmap.contains(jobinfo.getJob_en()))
 			 if (totalsize==success_size && !pre_runningmap.containsKey(job_en_item) && !currentstautsmap.containsKey(job_en_item))
 			 {
 				 jobinfo.setStarttime(new Date().getTime());
-				 
-				 synchronized(jobqueue)
-				 {
-					 logger.info("job_en:"+job_en+  " refed job_en:"+jobinfo.getJob_en()+" adding jobqueue");
-					
+				logger.info("job_en:"+job_en+  " refed job_en:"+jobinfo.getJob_en()+" adding jobqueue");
+				pre_runningmap.put(job_en_item, "");
 			    jobqueue.add(jobinfo);
-			    pre_runningmap.put(job_en_item, "");
-			   
 			    logger.info("job_en:"+job_en+  " refed job_en:"+jobinfo.getJob_en()+" added jobqueue");
 				 resortJobqueue();
 				  logger.info("job_en:"+job_en+  " refed job_en:"+jobinfo.getJob_en()+" resort jobqueue");
 				 jobqueue.notifyAll();
 				 logger.info("job_en:"+job_en+  " refed job_en:"+jobinfo.getJob_en()+" ended jobqueue");
-				 }
+				 
 			 }
-		
+		 }
 		  
 	  
 
