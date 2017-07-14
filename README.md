@@ -66,13 +66,13 @@ So do it,we add a project named "proj_test" ,the project run max 2 jobs and the 
 ${hour}=expr_date(hour-2,HH) mean if current hour is 10,${hour} return 8    
 ${a}=aaaaaaa mean parameter ${a} is constant value is aaaaaaa    
 
-The method of more convenient
-config your job and import mysql:
-download import/fenxi.xlsx module file to your pc,then write your job info ..
-setup xlrd to convert xls to csv then load to mysql
-pip install xlrd
-cd import
-sh mysql_import.sh fenxi.xlsx
+The method of more convenient    
+config your job and import mysql:    
+download import/fenxi.xlsx module file to your pc,then write your job info ..    
+setup xlrd to convert xls to csv then load to mysql    
+pip install xlrd    
+cd import    
+sh mysql_import.sh fenxi.xlsx    
 
 In this project,we add three jobs     test30_1（/root/test30_1.sh）、test30_2（/root/test30_2.sh）、test30_3（/root/test30_3.sh),according to the hdfs_input and hdfs_output,    
 build dependencies stream automatically ,run jobs(test30_1,test30_2) successed ,then run test30_3    
